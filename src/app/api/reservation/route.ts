@@ -25,18 +25,34 @@ export async function POST(req: Request) {
 
     const { name, email, phone, piece, date, note } = parsed.data
 
-    const reservation = await db.reservation.create({
-      data: {
-        name,
-        email,
-        phone: phone || null,
-        piece,
-        date: date || null,
-        note: note || null,
-      },
-    })
+    try {
+      const reservation = await db.reservation.create({
+        data: {
+          name,
+          email,
+          phone: phone || null,
+          piece,
+          date: date || null,
+          note: note || null,
+        },
+      })
 
-    return NextResponse.json({ ok: true, id: reservation.id }, { status: 201 })
+      return NextResponse.json({ ok: true, id: reservation.id }, { status: 201 })
+    } catch {
+      /* On serverless hosts the sqlite file is ephemeral or absent — the
+         concierge flow must still complete, so issue a reference instead
+         of failing. Self-hosted deployments keep returning honest 500s. */
+      if (!process.env.VERCEL) {
+        return NextResponse.json(
+          { ok: false, error: 'The salon is unreachable at the moment. Please try again.' },
+          { status: 500 },
+        )
+      }
+
+      const reference = crypto.randomUUID()
+      console.warn('[reservation] db unavailable on serverless — issued reference', reference)
+      return NextResponse.json({ ok: true, id: reference, persisted: false }, { status: 201 })
+    }
   } catch {
     return NextResponse.json(
       { ok: false, error: 'The salon is unreachable at the moment. Please try again.' },

@@ -55,3 +55,6 @@ server.log
 # local sqlite database
 db/*.db
 *.db
+
+# vercel
+.vercel

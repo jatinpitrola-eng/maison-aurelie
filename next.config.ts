@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
+/* Vercel manages its own build output — standalone is for self-hosting the sandbox */
+const isVercel = Boolean(process.env.VERCEL);
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  /* config options here */
+  ...(isVercel ? {} : { output: "standalone" as const }),
   typescript: {
     ignoreBuildErrors: true,
   },
