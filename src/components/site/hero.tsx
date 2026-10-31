@@ -73,10 +73,12 @@ export function Hero() {
         className="absolute inset-x-0 bottom-8 hidden justify-between px-12 sm:flex lg:px-24"
       >
         {['GIA & Gübelin certified', '18k gold · Platinum 950', 'Hand-finished · Rue de la Paix'].map(
-          (item) => (
+          (item, i) => (
             <span
               key={item}
-              className="flex items-center gap-3 text-[10px] uppercase tracking-[0.28em] text-espresso/45"
+              className={`flex items-center gap-3 text-[10px] uppercase tracking-[0.28em] text-espresso/45 ${
+                i === 1 ? 'lg:hidden' : ''
+              }`}
             >
               <span className="h-1 w-1 rotate-45 bg-gold" />
               {item}

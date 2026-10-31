@@ -43,50 +43,50 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ——— Maison Aurélie palette ——— */
-  --color-ivory: #F4EEE1;
-  --color-parchment: #FBF7EC;
-  --color-espresso: #241D12;
-  --color-coffee: #17120D;
-  --color-sand: #6E6353;
-  --color-gold: #A8863A;
-  --color-golddeep: #8C6D1F;
-  --color-champagne: #EFE6D2;
+  /* ——— Maison Aurélie palette · Porcelain & Émeraude ——— */
+  --color-ivory: #F6F4EC;
+  --color-parchment: #FCFAF4;
+  --color-espresso: #1A2C22;
+  --color-coffee: #0F3125;
+  --color-sand: #6B7A6E;
+  --color-gold: #AE8A4C;
+  --color-golddeep: #8C6C33;
+  --color-champagne: #F2EAD8;
 }
 
 :root {
   --radius: 0.25rem;
-  --background: #F4EEE1;
-  --foreground: #241D12;
-  --card: #FBF7EC;
-  --card-foreground: #241D12;
-  --popover: #FBF7EC;
-  --popover-foreground: #241D12;
-  --primary: #241D12;
-  --primary-foreground: #F4EEE1;
-  --secondary: #EAE1CC;
-  --secondary-foreground: #241D12;
-  --muted: #E9E0CB;
-  --muted-foreground: #6E6353;
-  --accent: #EADFC4;
-  --accent-foreground: #241D12;
+  --background: #F6F4EC;
+  --foreground: #1A2C22;
+  --card: #FCFAF4;
+  --card-foreground: #1A2C22;
+  --popover: #FCFAF4;
+  --popover-foreground: #1A2C22;
+  --primary: #1A2C22;
+  --primary-foreground: #F6F4EC;
+  --secondary: #E9EBDD;
+  --secondary-foreground: #1A2C22;
+  --muted: #EBEDE1;
+  --muted-foreground: #68766B;
+  --accent: #E6E9D8;
+  --accent-foreground: #1A2C22;
   --destructive: #A0322D;
-  --border: #DDD2B8;
-  --input: #DDD2B8;
-  --ring: #A8863A;
-  --chart-1: #A8863A;
-  --chart-2: #6E6353;
-  --chart-3: #8C6D1F;
-  --chart-4: #C9A34C;
-  --chart-5: #241D12;
-  --sidebar: #FBF7EC;
-  --sidebar-foreground: #241D12;
-  --sidebar-primary: #241D12;
-  --sidebar-primary-foreground: #F4EEE1;
-  --sidebar-accent: #EAE1CC;
-  --sidebar-accent-foreground: #241D12;
-  --sidebar-border: #DDD2B8;
-  --sidebar-ring: #A8863A;
+  --border: #DCE0CE;
+  --input: #DCE0CE;
+  --ring: #AE8A4C;
+  --chart-1: #AE8A4C;
+  --chart-2: #0F3125;
+  --chart-3: #8C6C33;
+  --chart-4: #C9A85E;
+  --chart-5: #1A2C22;
+  --sidebar: #FCFAF4;
+  --sidebar-foreground: #1A2C22;
+  --sidebar-primary: #1A2C22;
+  --sidebar-primary-foreground: #F6F4EC;
+  --sidebar-accent: #E9EBDD;
+  --sidebar-accent-foreground: #1A2C22;
+  --sidebar-border: #DCE0CE;
+  --sidebar-ring: #AE8A4C;
 }
 
 @layer base {
@@ -106,7 +106,7 @@
 /* --------------------------- Maison Aurélie site --------------------------- */
 
 html {
-  background: #F4EEE1;
+  background: #F6F4EC;
 }
 
 body {
@@ -114,13 +114,13 @@ body {
 }
 
 ::selection {
-  background: rgba(168, 134, 58, 0.28);
-  color: #241D12;
+  background: rgba(174, 138, 76, 0.26);
+  color: #1A2C22;
 }
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: #C9B98F transparent;
+  scrollbar-color: #B4C4B4 transparent;
 }
 ::-webkit-scrollbar {
   width: 7px;
@@ -129,16 +129,16 @@ html {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C9B98F;
+  background: #B4C4B4;
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A8863A;
+  background: #AE8A4C;
 }
 
-/* soft photographic vignette over the canvas */
+/* light-only photographic bloom — never dark edges */
 .vignette {
   background:
-    radial-gradient(85% 60% at 68% 18%, rgba(212, 175, 90, 0.09) 0%, transparent 60%),
-    radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(36, 29, 18, 0.14) 100%);
+    radial-gradient(90% 55% at 72% 10%, rgba(174, 138, 76, 0.09) 0%, transparent 62%),
+    radial-gradient(70% 50% at 10% 88%, rgba(15, 49, 37, 0.05) 0%, transparent 60%);
 }

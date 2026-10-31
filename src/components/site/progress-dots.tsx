@@ -44,7 +44,7 @@ export function ProgressDots() {
           <span
             className={`rounded-full transition-all duration-300 ${
               i === active
-                ? 'h-2.5 w-2.5 bg-gold shadow-[0_0_0_3px_rgba(168,134,58,0.18)]'
+                ? 'h-2.5 w-2.5 bg-gold shadow-[0_0_0_3px_rgba(174,138,76,0.2)]'
                 : onDark
                   ? 'h-1.5 w-1.5 bg-champagne/30 group-hover:bg-champagne/60'
                   : 'h-1.5 w-1.5 bg-espresso/25 group-hover:bg-espresso/50'

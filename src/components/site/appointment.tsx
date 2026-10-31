@@ -54,7 +54,7 @@ export function Appointment() {
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto w-full max-w-xl px-6 lg:px-0"
       >
-        <div className="border border-espresso/10 bg-parchment p-8 shadow-[0_32px_90px_-48px_rgba(32,26,18,0.4)] sm:p-10">
+        <div className="border border-espresso/10 bg-parchment p-8 shadow-[0_32px_90px_-48px_rgba(15,49,37,0.35)] sm:p-10">
           <div className="mb-6 h-px w-14 bg-gold/70" />
           <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-golddeep">The Salon</p>
           <h2 className="font-display text-4xl leading-tight text-espresso sm:text-5xl">

@@ -21,7 +21,7 @@ export function MetalSwitcher() {
               aria-pressed={active}
               className={`flex items-center gap-3 rounded-full border px-4 py-2.5 transition-all duration-300 ${
                 active
-                  ? 'border-golddeep bg-gold/10 shadow-[0_0_0_1px_rgba(140,109,31,0.25)]'
+                  ? 'border-golddeep bg-gold/10 shadow-[0_0_0_1px_rgba(140,108,51,0.25)]'
                   : 'border-espresso/15 hover:border-golddeep/60'
               }`}
             >

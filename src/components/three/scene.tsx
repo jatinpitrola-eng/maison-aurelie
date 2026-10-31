@@ -11,8 +11,8 @@ import { pointerState, scrollState, useJewelryStore } from '@/lib/jewelry-store'
 
 /* ------------------------------ keyframe toolkit ----------------------------- */
 
-const IVORY = new THREE.Color('#F4EEE1')
-const ESPRESSO = new THREE.Color('#17120D')
+const IVORY = new THREE.Color('#F6F4EC')
+const VAULT_GREEN = new THREE.Color('#0F3125')
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 const smooth = (x: number, a: number, b: number) => {
@@ -46,7 +46,7 @@ const KEYS: CamKey[] = [
   { t: 0.0, pos: [-0.62, 0.16, 4.5], tgt: [-0.62, 0.12, 0] }, // hero — ring right of the copy
   { t: 0.167, pos: [2.3, 0.75, 3.35], tgt: [0.72, 0.16, 0] }, // ring — piece left, copy right
   { t: 0.333, pos: [7.7, 0.5, 1.6], tgt: [6.5, -0.1, -3] }, // necklace — piece right, copy left
-  { t: 0.5, pos: [13.2, 0.3, 3.5], tgt: [15.05, 0.05, 0] }, // earrings — piece left, copy right
+  { t: 0.5, pos: [12.75, 0.3, 3.5], tgt: [14.6, 0.05, 0] }, // earrings — piece left, copy right
   { t: 0.667, pos: [21.4, 1.5, 2.2], tgt: [20.5, 0.05, -3] }, // bangle — piece right, switcher left
   { t: 0.833, pos: [28.95, -0.15, 5.7], tgt: [28, 0.28, 0] }, // tiara — low, centered
   { t: 1.0, pos: [28.35, 0.3, 7.4], tgt: [28.1, 0.1, 0] }, // drift out
@@ -56,9 +56,11 @@ function CameraRig() {
   useWindowPointer()
   const { size } = useThree()
   const fit = useRef(1)
+  const narrow = useRef(false)
   useEffect(() => {
     const aspect = size.width / Math.max(1, size.height)
-    fit.current = aspect < 0.72 ? Math.min(1.9, 0.72 / aspect) : 1
+    narrow.current = aspect < 0.72
+    fit.current = narrow.current ? Math.min(2.2, 1.65 * (0.72 / aspect)) : 1
   }, [size])
 
   const tgt = useRef(new THREE.Vector3(-0.62, 0.12, 0))
@@ -78,9 +80,13 @@ function CameraRig() {
     const ttv = tt.current
     const tpv = tp.current
 
+    /* on phones the hero piece becomes a right-side peek, clear of the copy */
+    const heroK = 1 - smooth(p, 0, 0.12)
+    const mob = narrow.current
+
     ttv.set(
-      a.tgt[0] + (b.tgt[0] - a.tgt[0]) * k,
-      a.tgt[1] + (b.tgt[1] - a.tgt[1]) * k,
+      a.tgt[0] + (b.tgt[0] - a.tgt[0]) * k - (mob ? heroK * 1.2 : 0),
+      a.tgt[1] + (b.tgt[1] - a.tgt[1]) * k + (mob ? 0.35 + heroK * 0.55 : 0),
       a.tgt[2] + (b.tgt[2] - a.tgt[2]) * k,
     )
     tpv.set(
@@ -93,9 +99,10 @@ function CameraRig() {
     tpv.x += pointerState.x * 0.07
     tpv.y += pointerState.y * 0.05
 
-    // pull back on narrow screens
-    if (fit.current !== 1) {
-      tpv.sub(ttv).multiplyScalar(fit.current).add(ttv)
+    // pull back on narrow screens (hero pulls back further so type stays clean)
+    const pull = fit.current * (mob ? 1 + heroK * 0.65 : 1)
+    if (pull !== 1) {
+      tpv.sub(ttv).multiplyScalar(pull).add(ttv)
     }
 
     const damp = THREE.MathUtils.damp
@@ -165,8 +172,8 @@ function Atmosphere() {
     const dark = smooth(p, 0.755, 0.815) * (1 - smooth(p, 0.9, 0.955))
     const f = fogRef.current
     if (f) {
-      f.color.copy(IVORY).lerp(ESPRESSO, dark)
-      f.density = 0.05 + dark * 0.028
+      f.color.copy(IVORY).lerp(VAULT_GREEN, dark)
+      f.density = 0.04 + dark * 0.022
     }
     const isDark = dark > 0.5
     if (isDark !== darkRef.current) {
@@ -175,7 +182,7 @@ function Atmosphere() {
     }
   })
 
-  return <fogExp2 ref={fogRef} attach="fog" args={['#F4EEE1', 0.05]} />
+  return <fogExp2 ref={fogRef} attach="fog" args={['#F6F4EC', 0.04]} />
 }
 
 /* ------------------------------------ scene ------------------------------------ */
@@ -202,7 +209,7 @@ export default function Scene() {
           <directionalLight position={[-6, 2, -4]} intensity={0.5} color="#EFD9AC" />
           {/* spotlight feel over the vault */}
           <pointLight position={[28, 2.8, 2.6]} intensity={26} distance={10} decay={2} color="#FFE9BE" />
-          <pointLight position={[21, 3.4, 2.2]} intensity={14} distance={9} decay={2} color="#FFF2D8" />
+          <pointLight position={[21, 3.4, 2.2]} intensity={14} distance={9} decay={2} color="#DFF2E4" />
 
           <Stage site={[0, 0, 0]} span={[-0.2, -0.05, 0.245, 0.3]}>
             <RingPiece />
@@ -210,7 +217,7 @@ export default function Scene() {
           <Stage site={[7, 0, -3]} span={[0.265, 0.315, 0.445, 0.5]}>
             <NecklacePiece />
           </Stage>
-          <Stage site={[14, 0, 0]} span={[0.46, 0.515, 0.61, 0.665]}>
+          <Stage site={[13.55, 0, 0]} span={[0.46, 0.515, 0.61, 0.665]}>
             <EarringsPiece />
           </Stage>
           <Stage site={[21, 0, -3]} span={[0.625, 0.68, 0.775, 0.83]}>

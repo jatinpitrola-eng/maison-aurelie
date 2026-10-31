@@ -46,8 +46,32 @@ export function RingPiece() {
             </mesh>
           )
         })}
-        <Brilliant tint="#F2F7F3" depth={1.6} scale={0.42} position={[0, 0.3, 0]} spin={0.55} />
+        <Brilliant tint="#F2F7F3" depth={1.6} scale={0.42} position={[0, 0.3, 0]} spin={0.55} dispersion={0.3} />
       </group>
+      {/* pavé shoulders — twelve marquise diamonds chased along the band */}
+      {[-1, 1].map((s) =>
+        Array.from({ length: 6 }, (_, k) => {
+          const a = Math.PI / 2 + s * (0.36 + k * 0.15)
+          return (
+            <mesh
+              key={`pave-${s}-${k}`}
+              position={[Math.cos(a) * 1.078, Math.sin(a) * 1.078, 0]}
+              rotation={[0, 0, a]}
+              scale={[0.028, 0.04, 0.024]}
+            >
+              <octahedronGeometry args={[1, 0]} />
+              <meshPhysicalMaterial
+                color="#FFFFFF"
+                roughness={0.07}
+                metalness={0}
+                envMapIntensity={3.1}
+                clearcoat={1}
+                flatShading
+              />
+            </mesh>
+          )
+        }),
+      )}
     </group>
   )
 }
@@ -128,7 +152,7 @@ function Earring({ side }: { side: number }) {
     ref.current.rotation.x = Math.sin(t * 0.6 + side) * 0.04
   })
   return (
-    <group ref={ref} position={[side * 0.85, 0.12, 0]}>
+    <group ref={ref} position={[side * 0.72, 0.12, 0]}>
       <Pearl scale={0.16} position={[0, 0.72, 0]} />
       <mesh position={[0, 0.41, 0]}>
         <cylinderGeometry args={[0.012, 0.012, 0.44, 10]} />
@@ -256,7 +280,7 @@ export function TiaraPiece() {
           >
             <octahedronGeometry args={[1, 0]} />
             <meshPhysicalMaterial
-              {...gemMat({ tint, depth: isDiamond ? 1.6 : 0.35, ior: isDiamond ? 2.28 : 1.78 })}
+              {...gemMat({ tint, depth: isDiamond ? 1.6 : 0.35, ior: isDiamond ? 2.28 : 1.78, dispersion: isDiamond ? 0.22 : 0.04 })}
               flatShading
             />
           </mesh>

@@ -13,10 +13,12 @@ export interface GemMatOpts {
   tint?: string
   depth?: number
   ior?: number
+  /** chromatic fire — diamond-style light splitting (three r167+) */
+  dispersion?: number
 }
 
 /** Shared physical-glass preset for every gemstone. */
-export function gemMat({ tint = '#F2F7F3', depth = 1.4, ior = 2.28 }: GemMatOpts = {}) {
+export function gemMat({ tint = '#F2F7F3', depth = 1.4, ior = 2.28, dispersion = 0 }: GemMatOpts = {}) {
   return {
     color: '#ffffff',
     metalness: 0,
@@ -24,6 +26,7 @@ export function gemMat({ tint = '#F2F7F3', depth = 1.4, ior = 2.28 }: GemMatOpts
     transmission: 1,
     thickness: 1.5,
     ior,
+    dispersion,
     attenuationColor: tint,
     attenuationDistance: depth,
     clearcoat: 1,
@@ -92,6 +95,8 @@ function brilliantGeometry() {
 export interface GemProps {
   tint?: string
   depth?: number
+  ior?: number
+  dispersion?: number
   scale?: number
   position?: [number, number, number]
   rotation?: [number, number, number]
@@ -99,7 +104,7 @@ export interface GemProps {
 }
 
 /** Faceted brilliant-cut stone (lathe, 8 segments, flat-shaded). */
-export function Brilliant({ tint = '#F2F7F3', depth = 1.4, scale = 1, position = [0, 0, 0], rotation = [0, 0, 0], spin = 0.4 }: GemProps) {
+export function Brilliant({ tint = '#F2F7F3', depth = 1.4, ior = 2.28, dispersion = 0.14, scale = 1, position = [0, 0, 0], rotation = [0, 0, 0], spin = 0.4 }: GemProps) {
   const geo = useMemo(() => brilliantGeometry(), [])
   const ref = useRef<THREE.Mesh>(null)
   useFrame((_, delta) => {
@@ -107,7 +112,7 @@ export function Brilliant({ tint = '#F2F7F3', depth = 1.4, scale = 1, position =
   })
   return (
     <mesh ref={ref} geometry={geo} position={position} rotation={rotation} scale={scale} castShadow={false}>
-      <meshPhysicalMaterial {...gemMat({ tint, depth })} flatShading />
+      <meshPhysicalMaterial {...gemMat({ tint, depth, ior, dispersion })} flatShading />
     </mesh>
   )
 }

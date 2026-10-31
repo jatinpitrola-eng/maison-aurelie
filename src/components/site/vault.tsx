@@ -29,9 +29,9 @@ export function Vault() {
             Impératrice
           </h2>
           <p className="mt-6 max-w-md leading-relaxed text-champagne/60">
-            Behind two tonnes of steel, the Impératrice rests under its own key. Nine
-            marquise stones — Burmese rubies, Golconda diamonds — drawn into a single
-            line of fire, exactly as you see it now.
+            Behind green velvet and two tonnes of steel, the Impératrice rests under
+            its own key. Nine marquise stones — Burmese rubies, Golconda diamonds —
+            drawn into a single line of fire, exactly as you see it now.
           </p>
           <p className="mt-8 font-display text-xl italic text-champagne/50">
             Never sold online. Never twice.
