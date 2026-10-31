@@ -1,30 +1,18 @@
 'use client'
 
 import * as THREE from 'three'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { ContactShadows, Environment, Float, Lightformer } from '@react-three/drei'
-import { Headphones } from './headphones'
-import { Buds } from './buds'
-import { Orb } from './orb'
-import { Shards } from './shards'
-import { Particles } from './particles'
-import { Driver, scrollState, oneDriver, zeroDriver } from '@/lib/product-store'
+import { Environment, Lightformer } from '@react-three/drei'
+import { RingPiece, NecklacePiece, EarringsPiece, BanglePiece, TiaraPiece } from './pieces'
+import { Dust } from './dust'
+import { useMetalLerp } from './gems'
+import { pointerState, scrollState, useJewelryStore } from '@/lib/jewelry-store'
 
 /* ------------------------------ keyframe toolkit ----------------------------- */
 
-interface Key {
-  t: number
-  pos: [number, number, number]
-  rot: [number, number, number]
-  s: number
-}
-
-interface Sampled {
-  pos: [number, number, number]
-  rot: [number, number, number]
-  s: number
-}
+const IVORY = new THREE.Color('#F4EEE1')
+const ESPRESSO = new THREE.Color('#17120D')
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 const smooth = (x: number, a: number, b: number) => {
@@ -33,411 +21,217 @@ const smooth = (x: number, a: number, b: number) => {
 }
 const smoother = (k: number) => k * k * k * (k * (k * 6 - 15) + 10)
 
-function sampleKeys(keys: Key[], p: number, out: Sampled) {
-  let i = 0
-  while (i < keys.length - 2 && p > keys[i + 1].t) i++
-  const a = keys[i]
-  const b = keys[i + 1]
-  const k = smoother(clamp01((p - a.t) / (b.t - a.t)))
-  for (let j = 0; j < 3; j++) {
-    out.pos[j] = a.pos[j] + (b.pos[j] - a.pos[j]) * k
-    out.rot[j] = a.rot[j] + (b.rot[j] - a.rot[j]) * k
-  }
-  out.s = a.s + (b.s - a.s) * k
-}
+/* -------------------------------- window pointer ------------------------------ */
 
-/* ---------------------------------- fit scale -------------------------------- */
-
-function useFit() {
-  const { size } = useThree()
-  return useMemo(() => {
-    const aspect = size.width / Math.max(1, size.height)
-    return Math.min(1, Math.max(0.46, aspect * 1.02))
-  }, [size])
-}
-
-/* -------------------------------- camera drift ------------------------------- */
-
-function CameraDrift() {
-  useFrame((state, delta) => {
-    try {
-    const d = Math.min(delta, 0.1)
-    const cam = state.camera
-    cam.position.x = THREE.MathUtils.damp(cam.position.x, state.pointer.x * 0.18, 2.2, d)
-    cam.position.y = THREE.MathUtils.damp(cam.position.y, 0.25 + state.pointer.y * 0.12, 2.2, d)
-    cam.lookAt(0, 0, 0)
-    } catch {
-      /* never kill the render loop */
+function useWindowPointer() {
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      pointerState.x = (e.clientX / window.innerWidth) * 2 - 1
+      pointerState.y = -((e.clientY / window.innerHeight) * 2 - 1)
     }
+    window.addEventListener('pointermove', onMove)
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+}
+
+/* -------------------------------- camera journey ------------------------------ */
+
+interface CamKey {
+  t: number
+  pos: [number, number, number]
+  tgt: [number, number, number]
+}
+
+const KEYS: CamKey[] = [
+  { t: 0.0, pos: [-0.62, 0.16, 4.5], tgt: [-0.62, 0.12, 0] }, // hero — ring right of the copy
+  { t: 0.167, pos: [2.3, 0.75, 3.35], tgt: [0.72, 0.16, 0] }, // ring — piece left, copy right
+  { t: 0.333, pos: [7.7, 0.5, 1.6], tgt: [6.5, -0.1, -3] }, // necklace — piece right, copy left
+  { t: 0.5, pos: [13.2, 0.3, 3.5], tgt: [15.05, 0.05, 0] }, // earrings — piece left, copy right
+  { t: 0.667, pos: [21.4, 1.5, 2.2], tgt: [20.5, 0.05, -3] }, // bangle — piece right, switcher left
+  { t: 0.833, pos: [28.95, -0.15, 5.7], tgt: [28, 0.28, 0] }, // tiara — low, centered
+  { t: 1.0, pos: [28.35, 0.3, 7.4], tgt: [28.1, 0.1, 0] }, // drift out
+]
+
+function CameraRig() {
+  useWindowPointer()
+  const { size } = useThree()
+  const fit = useRef(1)
+  useEffect(() => {
+    const aspect = size.width / Math.max(1, size.height)
+    fit.current = aspect < 0.72 ? Math.min(1.9, 0.72 / aspect) : 1
+  }, [size])
+
+  const tgt = useRef(new THREE.Vector3(-0.62, 0.12, 0))
+  const tp = useRef(new THREE.Vector3())
+  const tt = useRef(new THREE.Vector3())
+
+  useFrame((state, delta) => {
+    const d = Math.min(delta, 0.1)
+    const p = clamp01(scrollState.progress)
+
+    let i = 0
+    while (i < KEYS.length - 2 && p > KEYS[i + 1].t) i++
+    const a = KEYS[i]
+    const b = KEYS[i + 1]
+    const k = smoother(clamp01((p - a.t) / (b.t - a.t)))
+
+    const ttv = tt.current
+    const tpv = tp.current
+
+    ttv.set(
+      a.tgt[0] + (b.tgt[0] - a.tgt[0]) * k,
+      a.tgt[1] + (b.tgt[1] - a.tgt[1]) * k,
+      a.tgt[2] + (b.tgt[2] - a.tgt[2]) * k,
+    )
+    tpv.set(
+      a.pos[0] + (b.pos[0] - a.pos[0]) * k,
+      a.pos[1] + (b.pos[1] - a.pos[1]) * k,
+      a.pos[2] + (b.pos[2] - a.pos[2]) * k,
+    )
+
+    // gentle pointer parallax
+    tpv.x += pointerState.x * 0.07
+    tpv.y += pointerState.y * 0.05
+
+    // pull back on narrow screens
+    if (fit.current !== 1) {
+      tpv.sub(ttv).multiplyScalar(fit.current).add(ttv)
+    }
+
+    const damp = THREE.MathUtils.damp
+    state.camera.position.set(
+      damp(state.camera.position.x, tpv.x, 2.8, d),
+      damp(state.camera.position.y, tpv.y, 2.8, d),
+      damp(state.camera.position.z, tpv.z, 2.8, d),
+    )
+    const tg = tgt.current
+    tg.set(damp(tg.x, ttv.x, 2.8, d), damp(tg.y, ttv.y, 2.8, d), damp(tg.z, ttv.z, 2.8, d))
+    state.camera.lookAt(tg)
   })
   return null
 }
 
-/* ------------------------- ground shadows + hero mat ------------------------- */
+/* --------------------------------- piece stage -------------------------------- */
 
-function Ground() {
-  const fit = useFit()
-  const group = useRef<THREE.Group>(null)
+interface StageProps {
+  site: [number, number, number]
+  span: [number, number, number, number] // fadeIn0, fadeIn1, fadeOut0, fadeOut1
+  children: React.ReactNode
+}
+
+function Stage({ site, span, children }: StageProps) {
+  const ref = useRef<THREE.Group>(null)
+  const [active, setActive] = useState(false)
+  const activeRef = useRef(false)
+
+  useFrame((state, delta) => {
+    const d = Math.min(delta, 0.1)
+    const p = scrollState.progress
+    const vis = smooth(p, span[0], span[1]) * (1 - smooth(p, span[2], span[3]))
+    const on = vis > 0.002
+    if (on !== activeRef.current) {
+      activeRef.current = on
+      setActive(on)
+    }
+    const g = ref.current
+    if (!g) return
+    g.visible = on || g.scale.x > 0.012
+    g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, Math.max(vis, 0.001), 5, d))
+    g.position.set(
+      site[0],
+      site[1] + Math.sin(state.clock.elapsedTime * 0.5 + site[0]) * 0.035,
+      site[2],
+    )
+  })
+
+  if (!active) return null
+  return (
+    <group ref={ref} position={site} scale={0.001} visible={false}>
+      {children}
+    </group>
+  )
+}
+
+/* ---------------------------------- atmosphere --------------------------------- */
+
+function Atmosphere() {
+  const fogRef = useRef<THREE.FogExp2>(null)
+  const setOnDark = useJewelryStore((s) => s.setOnDark)
+  const darkRef = useRef(false)
+  useMetalLerp()
+
   useFrame(() => {
-    const g = group.current
-    if (!g) return
-    // rise onto the hero mat while it is visible
-    const fade = 1 - smooth(scrollState.progress, 0.02, 0.075)
-    g.position.y = fade * 0.14
-  })
-  return (
-    <group ref={group}>
-      <ContactShadows
-        position={[0, -1.35 * fit - 0.25, 0]}
-        opacity={0.55}
-        scale={11}
-        blur={2.8}
-        far={3.4}
-        color="#000000"
-      />
-    </group>
-  )
-}
-
-/** Oryzo-style green felt cutting mat under the product — hero only */
-function HeroMat() {
-  const ref = useRef<THREE.Mesh>(null)
-  const matRef = useRef<THREE.MeshStandardMaterial>(null)
-  useFrame(() => {
-    const m = matRef.current
-    const mesh = ref.current
-    if (!m || !mesh) return
-    const o = 1 - smooth(scrollState.progress, 0.02, 0.075)
-    m.opacity = o
-    mesh.visible = o > 0.01
-  })
-  return (
-    <mesh ref={ref} position={[0, -1.66, 0]} rotation-x={-Math.PI / 2} visible>
-      <cylinderGeometry args={[2.9, 2.9, 0.05, 64]} />
-      <meshStandardMaterial ref={matRef} color="#2e3d2c" roughness={1} metalness={0} transparent opacity={1} />
-    </mesh>
-  )
-}
-
-/* ------------------------------ X1 headphones rig ---------------------------- */
-/* Product stays center-stage (Oryzo style); text flanks it. Exits by zooming
-   through the camera. */
-
-const X1_KEYS: Key[] = [
-  { t: 0.0, pos: [0, -0.06, 0], rot: [0.05, -0.55, 0], s: 0.86 }, // hero — front, annotations
-  { t: 0.1, pos: [0, 0.0, 0.1], rot: [0.06, -2.3, 0], s: 0.8 }, // ANC — profile
-  { t: 0.2, pos: [0, 0.02, 0.1], rot: [0.03, -3.7, 0], s: 0.68 }, // acoustics — exploded
-  { t: 0.3, pos: [0, 0.14, 0.3], rot: [0.4, -4.4, 0], s: 0.88 }, // design — close-up tilt
-  { t: 0.4, pos: [0, -0.02, 0], rot: [0.04, -6.65, 0], s: 0.82 }, // colors — front after full turn
-]
-
-function X1Rig() {
-  const ref = useRef<THREE.Group>(null)
-  const driver = useRef(0)
-  const fit = useFit()
-  const out = useMemo<Sampled>(() => ({ pos: [0, 0, 0], rot: [0, 0, 0], s: 1 }), [])
-  const [active, setActive] = useState(true)
-  const activeRef = useRef(true)
-
-  const WIN: [number, number] = [-0.01, 0.46]
-
-  useFrame((state, delta) => {
-    const d = Math.min(delta, 0.1)
     const p = scrollState.progress
-    const on = p >= WIN[0] - 0.03 && p <= WIN[1] + 0.05
-    if (on !== activeRef.current) {
-      activeRef.current = on
-      setActive(on)
+    const dark = smooth(p, 0.755, 0.815) * (1 - smooth(p, 0.9, 0.955))
+    const f = fogRef.current
+    if (f) {
+      f.color.copy(IVORY).lerp(ESPRESSO, dark)
+      f.density = 0.05 + dark * 0.028
     }
-
-    const g = ref.current
-    if (!g) return
-
-    // explode driver — peaks around the acoustics section
-    driver.current = smooth(p, 0.155, 0.19) * (1 - smooth(p, 0.24, 0.31))
-
-    if (!on) {
-      g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, 0.001, 6, d))
-      return
+    const isDark = dark > 0.5
+    if (isDark !== darkRef.current) {
+      darkRef.current = isDark
+      setOnDark(isDark)
     }
-
-    const local = clamp01((p - WIN[0]) / (WIN[1] - WIN[0]))
-    sampleKeys(X1_KEYS, p, out)
-    const t = state.clock.elapsedTime
-    const damp = THREE.MathUtils.damp
-
-    // zoom THROUGH the camera on exit — cinematic hand-off to the next product
-    const exitK = smooth(local, 0.9, 1)
-    const kMul = 1 + exitK * 1.9
-    const yOff = exitK * 0.7 + (1 - exitK) * 0
-    const spin = exitK * 2.4
-    const zOff = exitK * 2.4
-
-    const tx = out.pos[0] + state.pointer.x * 0.08
-    const ty = out.pos[1] + Math.sin(t * 0.9) * 0.03 + state.pointer.y * 0.05 + yOff
-
-    g.position.x = damp(g.position.x, tx, 4, d)
-    g.position.y = damp(g.position.y, ty, 4, d)
-    g.position.z = damp(g.position.z, out.pos[2] + zOff, 4, d)
-    g.rotation.x = damp(g.rotation.x, out.rot[0] + state.pointer.y * 0.06, 4, d)
-    g.rotation.y = damp(g.rotation.y, out.rot[1] + spin + state.pointer.x * 0.14, 4, d)
-    g.rotation.z = damp(g.rotation.z, out.rot[2], 4, d)
-    g.scale.setScalar(damp(g.scale.x, fit * out.s * kMul, 4, d))
   })
 
-  if (!active) return null
-  return (
-    <group ref={ref} scale={fit}>
-      <Float speed={1.3} rotationIntensity={0.12} floatIntensity={0.55} floatingRange={[-0.04, 0.04]}>
-        <Headphones driver={driver as Driver} />
-      </Float>
-    </group>
-  )
+  return <fogExp2 ref={fogRef} attach="fog" args={['#F4EEE1', 0.05]} />
 }
 
-/* --------------------------------- buds rig ---------------------------------- */
-
-const BUDS_KEYS: Key[] = [
-  { t: 0.6, pos: [0, -0.05, 0], rot: [0.03, -0.4, 0], s: 0.84 }, // intro — centered, lid cracking open
-  { t: 0.7, pos: [0, -0.02, 0.15], rot: [0.05, 0.5, 0], s: 0.9 }, // tech — centered, open
-]
-
-function BudsRig() {
-  const ref = useRef<THREE.Group>(null)
-  const driver = useRef(0)
-  const fit = useFit()
-  const out = useMemo<Sampled>(() => ({ pos: [0, 0, 0], rot: [0, 0, 0], s: 1 }), [])
-  const [active, setActive] = useState(false)
-  const activeRef = useRef(false)
-
-  const WIN: [number, number] = [0.5, 0.72]
-
-  useFrame((state, delta) => {
-    const d = Math.min(delta, 0.1)
-    const p = scrollState.progress
-    const on = p >= WIN[0] - 0.03 && p <= WIN[1] + 0.05
-    if (on !== activeRef.current) {
-      activeRef.current = on
-      setActive(on)
-    }
-
-    const g = ref.current
-    if (!g) return
-
-    const local = clamp01((p - WIN[0]) / (WIN[1] - WIN[0]))
-    // lid opens between the intro and tech sections
-    driver.current = on ? smooth(local, 0.22, 0.55) : 0
-
-    if (!on) {
-      g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, 0.001, 6, d))
-      return
-    }
-
-    sampleKeys(BUDS_KEYS, p, out)
-    const t = state.clock.elapsedTime
-    const damp = THREE.MathUtils.damp
-
-    // rise in from below, zoom through camera on exit
-    const enter = smooth(local, 0, 0.14)
-    const exitK = smooth(local, 0.9, 1)
-    const kMul = 0.12 + 0.88 * enter + exitK * 1.9
-    const yOff = (1 - enter) * -1.2 + exitK * 0.7
-    const spin = (1 - enter) * 1.1 + exitK * 2.4
-    const zOff = exitK * 2.4
-
-    const tx = out.pos[0] + state.pointer.x * 0.08
-    const ty = out.pos[1] + Math.sin(t * 1.05) * 0.035 + state.pointer.y * 0.05 + yOff
-
-    g.position.x = damp(g.position.x, tx, 4, d)
-    g.position.y = damp(g.position.y, ty, 4, d)
-    g.position.z = damp(g.position.z, out.pos[2] + zOff, 4, d)
-    g.rotation.x = damp(g.rotation.x, out.rot[0] + state.pointer.y * 0.06, 4, d)
-    g.rotation.y = damp(g.rotation.y, out.rot[1] + spin + state.pointer.x * 0.14, 4, d)
-    g.rotation.z = damp(g.rotation.z, out.rot[2], 4, d)
-    g.scale.setScalar(damp(g.scale.x, fit * out.s * kMul, 4, d))
-  })
-
-  if (!active) return null
-  return (
-    <group ref={ref} scale={0.001}>
-      <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.5} floatingRange={[-0.04, 0.04]}>
-        <Buds driver={driver as Driver} />
-      </Float>
-    </group>
-  )
-}
-
-/* ---------------------------------- orb rig ---------------------------------- */
-
-const ORB_KEYS: Key[] = [
-  { t: 0.8, pos: [0, -0.05, 0], rot: [0.02, -0.3, 0], s: 0.92 }, // intro — centered
-  { t: 0.9, pos: [0, 0, 0.35], rot: [0.05, 0.35, 0], s: 1.02 }, // tech — closer
-]
-
-function OrbRig() {
-  const ref = useRef<THREE.Group>(null)
-  const pulse = useRef(0)
-  const fit = useFit()
-  const out = useMemo<Sampled>(() => ({ pos: [0, 0, 0], rot: [0, 0, 0], s: 1 }), [])
-  const [active, setActive] = useState(false)
-  const activeRef = useRef(false)
-
-  const WIN: [number, number] = [0.72, 0.92]
-
-  useFrame((state, delta) => {
-    const d = Math.min(delta, 0.1)
-    const p = scrollState.progress
-    const on = p >= WIN[0] - 0.03 && p <= WIN[1] + 0.05
-    if (on !== activeRef.current) {
-      activeRef.current = on
-      setActive(on)
-    }
-
-    const g = ref.current
-    if (!g) return
-
-    const local = clamp01((p - WIN[0]) / (WIN[1] - WIN[0]))
-    pulse.current = on ? smooth(local, 0.1, 0.3) : 0
-
-    if (!on) {
-      g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, 0.001, 6, d))
-      return
-    }
-
-    sampleKeys(ORB_KEYS, p, out)
-    const t = state.clock.elapsedTime
-    const damp = THREE.MathUtils.damp
-
-    const enter = smooth(local, 0, 0.14)
-    const exitK = smooth(local, 0.9, 1)
-    const kMul = 0.12 + 0.88 * enter + exitK * 1.9
-    const yOff = (1 - enter) * -1.2 + exitK * 0.7
-    const spin = (1 - enter) * 1.1 + exitK * 2.4
-    const zOff = exitK * 2.4
-
-    const tx = out.pos[0] + state.pointer.x * 0.08
-    const ty = out.pos[1] + Math.sin(t * 0.8) * 0.04 + state.pointer.y * 0.05 + yOff
-
-    g.position.x = damp(g.position.x, tx, 4, d)
-    g.position.y = damp(g.position.y, ty, 4, d)
-    g.position.z = damp(g.position.z, out.pos[2] + zOff, 4, d)
-    g.rotation.x = damp(g.rotation.x, out.rot[0] + state.pointer.y * 0.06, 4, d)
-    g.rotation.y = damp(g.rotation.y, out.rot[1] + spin + state.pointer.x * 0.14, 4, d)
-    g.rotation.z = damp(g.rotation.z, out.rot[2], 4, d)
-    g.scale.setScalar(damp(g.scale.x, fit * out.s * kMul, 4, d))
-  })
-
-  if (!active) return null
-  return (
-    <group ref={ref} scale={0.001}>
-      <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.6} floatingRange={[-0.05, 0.05]}>
-        <Orb pulse={pulse as Driver} />
-      </Float>
-    </group>
-  )
-}
-
-/* ------------------------------ finale lineup -------------------------------- */
-
-function Finale() {
-  const ref = useRef<THREE.Group>(null)
-  const fit = useFit()
-  const [active, setActive] = useState(false)
-  const activeRef = useRef(false)
-
-  useFrame((state, delta) => {
-    const d = Math.min(delta, 0.1)
-    const p = scrollState.progress
-    const on = p >= 0.9
-    if (on !== activeRef.current) {
-      activeRef.current = on
-      setActive(on)
-    }
-
-    const g = ref.current
-    if (!g) return
-
-    const k = smooth(p, 0.925, 0.98)
-    const t = state.clock.elapsedTime
-    const damp = THREE.MathUtils.damp
-
-    if (!on) {
-      g.scale.setScalar(damp(g.scale.x, 0.001, 6, d))
-      return
-    }
-
-    g.position.y = damp(g.position.y, (1 - k) * -1.3, 4, d)
-    g.rotation.y = damp(g.rotation.y, Math.sin(t * 0.18) * 0.12 + state.pointer.x * 0.12, 2.5, d)
-    g.scale.setScalar(damp(g.scale.x, fit * (0.2 + 0.8 * k), 4, d))
-  })
-
-  if (!active) return null
-  return (
-    <group ref={ref} scale={0.001} position={[0, -1.3, 0]}>
-      <group position={[-1.42, -0.48, 0]} scale={0.48}>
-        <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.4}>
-          <Headphones driver={zeroDriver} />
-        </Float>
-      </group>
-      <group position={[0.02, -0.58, 0.15]} scale={0.58}>
-        <Float speed={1.4} rotationIntensity={0.1} floatIntensity={0.45}>
-          <Buds driver={oneDriver} />
-        </Float>
-      </group>
-      <group position={[1.42, -0.52, 0]} scale={0.46}>
-        <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.5}>
-          <Orb pulse={oneDriver} />
-        </Float>
-      </group>
-    </group>
-  )
-}
-
-/* ---------------------------------- scene ------------------------------------ */
+/* ------------------------------------ scene ------------------------------------ */
 
 export default function Scene() {
   return (
-    <div className="fixed inset-0 z-0" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
       <Canvas
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-        camera={{ position: [0, 0.25, 4.6], fov: 38 }}
+        camera={{ position: [-0.62, 0.16, 4.5], fov: 38, near: 0.1, far: 90 }}
         onCreated={({ scene, camera }) => {
-          const w = window as unknown as { __auraScene?: THREE.Scene; __auraCam?: THREE.Camera }
-          w.__auraScene = scene
-          w.__auraCam = camera
+          const w = window as unknown as { __aurelieScene?: THREE.Scene; __aurelieCam?: THREE.Camera }
+          w.__aurelieScene = scene
+          w.__aurelieCam = camera
         }}
       >
         <Suspense fallback={null}>
-          {/* depth haze — products & shards fade into the dark */}
-          <fogExp2 attach="fog" args={['#0f0a07', 0.042]} />
+          <Atmosphere />
 
-          {/* key / rim / fill lights */}
-          <ambientLight intensity={0.14} />
-          <directionalLight position={[4, 5, 5]} intensity={1.5} color="#fff1e0" />
-          <directionalLight position={[-5, 2, -4]} intensity={0.55} color="#ffcf9e" />
-          <pointLight position={[0, -1.4, 3.2]} intensity={5} distance={9} color="#ffffff" />
+          {/* key / fill / vault lights */}
+          <ambientLight intensity={0.32} />
+          <directionalLight position={[4, 6, 5]} intensity={1.15} color="#FFF6E6" />
+          <directionalLight position={[-6, 2, -4]} intensity={0.5} color="#EFD9AC" />
+          {/* spotlight feel over the vault */}
+          <pointLight position={[28, 2.8, 2.6]} intensity={26} distance={10} decay={2} color="#FFE9BE" />
+          <pointLight position={[21, 3.4, 2.2]} intensity={14} distance={9} decay={2} color="#FFF2D8" />
 
-          <X1Rig />
-          <BudsRig />
-          <OrbRig />
-          <Finale />
+          <Stage site={[0, 0, 0]} span={[-0.2, -0.05, 0.245, 0.3]}>
+            <RingPiece />
+          </Stage>
+          <Stage site={[7, 0, -3]} span={[0.265, 0.315, 0.445, 0.5]}>
+            <NecklacePiece />
+          </Stage>
+          <Stage site={[14, 0, 0]} span={[0.46, 0.515, 0.61, 0.665]}>
+            <EarringsPiece />
+          </Stage>
+          <Stage site={[21, 0, -3]} span={[0.625, 0.68, 0.775, 0.83]}>
+            <BanglePiece />
+          </Stage>
+          <Stage site={[28, 0, 0]} span={[0.785, 0.84, 0.955, 0.995]}>
+            <TiaraPiece />
+          </Stage>
 
-          <Particles />
-          <Shards />
-          <HeroMat />
-          <Ground />
+          <Dust />
 
           {/* locally-rendered studio environment — zero network requests */}
           <Environment resolution={256} frames={1}>
-            <Lightformer intensity={3.2} position={[0, 4.5, 1]} rotation-x={Math.PI / 2} scale={[9, 9, 1]} color="#ffffff" />
-            <Lightformer intensity={1.6} position={[-4, 1, -1]} rotation-y={Math.PI / 2} scale={[7, 1.6, 1]} color="#ffe6c4" />
-            <Lightformer intensity={1.6} position={[4, 1, 0]} rotation-y={-Math.PI / 2} scale={[7, 1.6, 1]} color="#fff3e0" />
-            <Lightformer intensity={0.9} position={[0, 1.5, 4.5]} scale={[6, 2.4, 1]} color="#ffffff" />
-            <Lightformer form="ring" intensity={1.2} position={[0, 0.5, -4]} scale={2.4} color="#ffb45e" />
+            <Lightformer intensity={2.6} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} color="#FFFFFF" />
+            <Lightformer intensity={1.4} position={[-5, 1, 0]} rotation-y={Math.PI / 2} scale={[8, 1.8, 1]} color="#F3E3BC" />
+            <Lightformer intensity={1.6} position={[5, 1, 0]} rotation-y={-Math.PI / 2} scale={[8, 1.8, 1]} color="#FFFFFF" />
+            <Lightformer intensity={0.8} position={[0, 1, 5]} scale={[6, 3, 1]} color="#FFF9EE" />
+            <Lightformer form="ring" intensity={1.1} position={[0, 0.5, -5]} scale={3} color="#E8C87A" />
           </Environment>
 
-          <CameraDrift />
+          <CameraRig />
         </Suspense>
       </Canvas>
     </div>

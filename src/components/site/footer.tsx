@@ -1,64 +1,64 @@
 'use client'
 
-import { Github, Instagram, Twitter, Youtube } from 'lucide-react'
-import { scrollToSection } from '@/lib/product-store'
+import { Gem } from 'lucide-react'
+import { scrollToId } from '@/lib/jewelry-store'
 
-const SOCIALS = [
-  { icon: Twitter, label: 'Twitter' },
-  { icon: Instagram, label: 'Instagram' },
-  { icon: Youtube, label: 'YouTube' },
-  { icon: Github, label: 'GitHub' },
-]
-
-const LINKS: { label: string; section: number }[] = [
-  { label: 'Intro', section: 0 },
-  { label: 'X1', section: 1 },
-  { label: 'Buds', section: 6 },
-  { label: 'Orb', section: 8 },
-  { label: 'Reserve', section: 10 },
+const MAISON: Array<[string, string]> = [
+  ['Collection', 'piece-ring'],
+  ['Atelier', 'piece-bangle'],
+  ['Vault', 'vault'],
+  ['Private Salon', 'appointment'],
 ]
 
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 md:flex-row md:px-12">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_14px_3px_rgba(255,138,42,0.5)]" />
-          <span className="text-xs font-black tracking-[0.3em] text-[#f2ead9]">AURA</span>
-          <span className="text-[10px] font-medium tracking-[0.2em] text-zinc-600">© 2025</span>
+    <footer className="relative z-10 mt-auto bg-coffee text-champagne/70">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
+        <div className="grid gap-12 md:grid-cols-3">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <Gem className="h-4 w-4 text-gold" strokeWidth={1.5} />
+              <span className="font-display text-lg tracking-[0.42em] text-champagne">
+                AURÉLIE
+              </span>
+            </div>
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-champagne/50">
+              Haute joaillerie, hand-finished in Paris since 1924. One piece at a
+              time — never twice.
+            </p>
+          </div>
+
+          <nav aria-label="Footer">
+            <p className="mb-5 text-[10px] uppercase tracking-[0.3em] text-gold">Maison</p>
+            <ul className="space-y-3">
+              {MAISON.map(([label, id]) => (
+                <li key={id}>
+                  <button
+                    onClick={() => scrollToId(id)}
+                    className="text-sm text-champagne/60 transition-colors hover:text-gold"
+                  >
+                    {label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div>
+            <p className="mb-5 text-[10px] uppercase tracking-[0.3em] text-gold">Salon</p>
+            <address className="space-y-3 text-sm not-italic text-champagne/60">
+              <p>21 Rue de la Paix, 75002 Paris</p>
+              <p>salon@aurelie.paris</p>
+              <p>+33 1 42 60 00 00</p>
+              <p className="text-champagne/40">Tue – Sat, 10h – 19h · By appointment</p>
+            </address>
+          </div>
         </div>
 
-        <nav aria-label="Footer navigation" className="flex flex-wrap items-center justify-center gap-6">
-          {LINKS.map((l) => (
-            <button
-              key={l.label}
-              onClick={() => scrollToSection(l.section)}
-              className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500 transition-colors hover:text-[#f2ead9]"
-            >
-              {l.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          {SOCIALS.map((s) => (
-            <a
-              key={s.label}
-              href="#intro"
-              onClick={(e) => e.preventDefault()}
-              aria-label={s.label}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-zinc-500 transition-colors hover:border-orange-400/40 hover:text-orange-300"
-            >
-              <s.icon className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          ))}
+        <div className="mt-14 flex flex-col gap-3 border-t border-champagne/10 pt-6 text-[10px] uppercase tracking-[0.22em] text-champagne/35 md:flex-row md:items-center md:justify-between">
+          <span>© 2025 Maison Aurélie — Paris</span>
+          <span>Crafted in 18k gold & platinum 950</span>
         </div>
-      </div>
-
-      <div className="border-t border-white/5">
-        <p className="mx-auto max-w-7xl px-6 py-4 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-700 md:px-12">
-          Rendered live in WebGL · Three.js · React Three Fiber — real geometry, real particles
-        </p>
       </div>
     </footer>
   )
