@@ -132,11 +132,11 @@ export function Footer() {
       </motion.div>
 
       <div className="border-t border-gold/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 sm:flex-row sm:px-8">
-          <p className="text-[11px] font-light tracking-[0.18em] text-ivory/40">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 pt-6 pb-24 sm:flex-row sm:px-8 sm:pt-6 sm:pb-20">
+          <p className="max-w-full text-center text-[11px] font-light tracking-[0.18em] text-ivory/40">
             © {new Date().getFullYear()} Maison Aurélie. All rights reserved.
           </p>
-          <p className="text-[11px] font-light tracking-[0.18em] text-ivory/40">
+          <p className="max-w-full text-center text-[11px] font-light tracking-[0.18em] text-ivory/40">
             GIA Certified · BIS Hallmarked · Lifetime Care
           </p>
         </div>

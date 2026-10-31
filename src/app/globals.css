@@ -109,10 +109,11 @@
 
 html {
   background: #0B0907;
+  overflow-x: clip;
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 ::selection {
