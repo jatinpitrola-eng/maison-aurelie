@@ -5,7 +5,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { scrollState } from '@/lib/product-store'
 
-const COUNT = 2200
+const COUNT = 2800
 
 const VERT = /* glsl */ `
   uniform float uTime;
@@ -96,7 +96,8 @@ export function Particles() {
   const materialRef = useRef(material)
 
   useFrame((state, delta) => {
-    const d = Math.min(delta, 0.05)
+    try {
+    const d = Math.min(delta, 0.1)
     const mat = materialRef.current
     mat.uniforms.uTime.value = state.clock.elapsedTime
 
@@ -109,6 +110,9 @@ export function Particles() {
     // gentle mouse parallax on the whole field
     g.rotation.y = THREE.MathUtils.damp(g.rotation.y, state.pointer.x * 0.07, 2.5, d)
     g.rotation.x = THREE.MathUtils.damp(g.rotation.x, -state.pointer.y * 0.05, 2.5, d)
+    } catch {
+      /* never kill the render loop */
+    }
   })
 
   return <points ref={ref} geometry={geometry} material={material} frustumCulled={false} />

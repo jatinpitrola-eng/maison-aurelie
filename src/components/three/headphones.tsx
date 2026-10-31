@@ -3,12 +3,7 @@
 import * as THREE from 'three'
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { getColor, scrollState, useProductStore } from '@/lib/product-store'
-
-const smooth = (a: number, b: number, x: number) => {
-  const k = Math.min(1, Math.max(0, (x - a) / (b - a)))
-  return k * k * (3 - 2 * k)
-}
+import { Driver, getColor, zeroDriver, useProductStore } from '@/lib/product-store'
 
 interface ExplodeGroups {
   shell: THREE.Group | null
@@ -19,7 +14,7 @@ interface ExplodeGroups {
 
 const emptyGroups = (): ExplodeGroups => ({ shell: null, cushion: null, driver: null, cap: null })
 
-export function Headphones() {
+export function Headphones({ driver }: { driver?: Driver }) {
   const colorId = useProductStore((s) => s.colorId)
   const targetColor = useMemo(() => new THREE.Color(getColor(colorId).hex), [colorId])
 
@@ -90,15 +85,15 @@ export function Headphones() {
 
   /* --------------------------- per-frame updates --------------------------- */
   useFrame((_, delta) => {
-    const d = Math.min(delta, 0.05)
+    try {
+    const d = Math.min(delta, 0.1)
     const m = matsRef.current
 
     // smooth color transition
     m.body.color.lerp(targetColor, 1 - Math.exp(-6 * d))
 
-    // exploded-view factor: rises in section 2, folds back before section 3
-    const p = scrollState.progress
-    const ex = smooth(0.2, 0.31, p) * (1 - smooth(0.4, 0.52, p))
+    // exploded-view factor driven by the rig (0 = assembled, 1 = disassembled)
+    const ex = (driver ?? zeroDriver).current
 
     // driver glow while exploded
     m.fabric.emissiveIntensity = ex * 1.6
@@ -110,6 +105,9 @@ export function Headphones() {
       if (g.cushion) g.cushion.position.x = -s * 0.24 - s * ex * 0.3
       if (g.driver) g.driver.position.x = -s * 0.295 - s * ex * 0.22
       if (g.cap) g.cap.position.x = s * 0.29 + s * ex * 0.36
+    }
+    } catch {
+      /* never kill the render loop */
     }
   })
 
