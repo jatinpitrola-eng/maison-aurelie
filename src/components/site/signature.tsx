@@ -1,8 +1,9 @@
 'use client'
 
-import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { scrollToId } from '@/lib/jewelry-store'
 import { Reveal } from './reveal'
+import { ParallaxImage, RotatingBadge } from './motion-primitives'
 
 const SPECS = [
   ['Origin', 'Muzo, Colombia'],
@@ -20,21 +21,26 @@ export function Signature() {
       aria-label="Signature piece"
     >
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
-        {/* photograph with offset gold frame */}
+        {/* photograph with offset gold frame + rotating seal */}
         <Reveal className="relative">
           <div
             className="absolute -top-5 -left-5 hidden h-full w-full border border-golddeep/40 sm:block"
             aria-hidden="true"
           />
-          <div className="relative aspect-[4/5] w-full overflow-hidden">
-            <Image
-              src="/images/neck-2.jpg"
-              alt="Rivière Émeraude — diamond and Colombian emerald necklace"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </div>
+          <ParallaxImage
+            src="/images/neck-2.jpg"
+            alt="Rivière Émeraude — diamond and Colombian emerald necklace"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            strength={9}
+            zoom={1.16}
+            className="relative aspect-[4/5] w-full"
+          />
+
+          <RotatingBadge
+            text="Maison Aurélie · Est. 1962 · "
+            className="animate-float absolute -top-8 -right-4 z-10 h-24 w-24 rounded-full border border-golddeep/25 bg-parchment text-golddeep shadow-[0_10px_36px_-14px_rgba(25,21,18,0.5)] sm:-right-8 sm:h-28 sm:w-28"
+          />
+
           <div className="absolute right-4 bottom-4 border border-golddeep/30 bg-parchment/92 px-5 py-3 backdrop-blur-sm">
             <p className="text-[10px] font-light uppercase tracking-[0.3em] text-golddeep">
               The Signature
@@ -69,30 +75,49 @@ export function Signature() {
             </p>
           </Reveal>
 
-          <Reveal delay={0.2}>
-            <dl className="mt-9 divide-y divide-espresso/10 border-y border-espresso/10">
-              {SPECS.map(([k, v]) => (
-                <div key={k} className="flex items-baseline justify-between gap-6 py-3.5">
-                  <dt className="text-[10px] font-light uppercase tracking-[0.3em] text-espresso/50">
-                    {k}
-                  </dt>
-                  <dd className="text-right font-display text-lg font-medium text-espresso">
-                    {v}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
+          {/* specs stagger in, row by row */}
+          <motion.dl
+            initial="closed"
+            whileInView="open"
+            viewport={{ once: true, margin: '-70px' }}
+            transition={{ staggerChildren: 0.07 }}
+            className="mt-9 divide-y divide-espresso/10 border-y border-espresso/10"
+          >
+            {SPECS.map(([k, v]) => (
+              <motion.div
+                key={k}
+                variants={{
+                  closed: { opacity: 0, x: -18 },
+                  open: {
+                    opacity: 1,
+                    x: 0,
+                    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+                  },
+                }}
+                className="flex items-baseline justify-between gap-6 py-3.5"
+              >
+                <dt className="text-[10px] font-light uppercase tracking-[0.3em] text-espresso/50">
+                  {k}
+                </dt>
+                <dd className="text-right font-display text-lg font-medium text-espresso">
+                  {v}
+                </dd>
+              </motion.div>
+            ))}
+          </motion.dl>
 
           <Reveal delay={0.26}>
             <div className="mt-9 flex flex-wrap items-center gap-6">
               <p className="font-display text-3xl font-medium text-golddeep">₹ 24,80,000</p>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 22 }}
                 onClick={() => scrollToId('appointment')}
-                className="border border-espresso bg-espresso px-8 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-ivory transition-all duration-300 hover:bg-golddeep"
+                className="border border-espresso bg-espresso px-8 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-ivory transition-colors duration-300 hover:bg-golddeep"
               >
                 Reserve this piece
-              </button>
+              </motion.button>
             </div>
           </Reveal>
         </div>

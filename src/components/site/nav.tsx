@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useSpring } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { lenisRef, scrollToId } from '@/lib/jewelry-store'
 
@@ -16,6 +16,11 @@ const LINKS = [
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [hidden, setHidden] = useState(false)
+
+  /* gold scroll-progress hairline under the header */
+  const { scrollY, scrollYProgress } = useScroll()
+  const progress = useSpring(scrollYProgress, { stiffness: 110, damping: 26, mass: 0.4 })
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 48)
@@ -23,6 +28,13 @@ export function Nav() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  /* hide on scroll-down, return on scroll-up — like a maître d’ stepping aside */
+  useMotionValueEvent(scrollY, 'change', (v) => {
+    const prev = scrollY.getPrevious() ?? 0
+    const goingDown = v > prev
+    setHidden(goingDown && v > 160 && !open)
+  })
 
   const go = (id: string) => {
     setOpen(false)
@@ -44,8 +56,10 @@ export function Nav() {
 
   return (
     <>
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+      <motion.header
+        animate={{ y: hidden ? '-100%' : '0%' }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
           scrolled
             ? 'border-b border-gold/15 bg-noir/85 backdrop-blur-md'
             : 'border-b border-transparent bg-transparent'
@@ -109,7 +123,14 @@ export function Nav() {
             </button>
           </div>
         </nav>
-      </header>
+
+        {/* scroll progress — a thin gold thread filling as you descend */}
+        <motion.div
+          style={{ scaleX: progress }}
+          className="absolute inset-x-0 bottom-0 h-px origin-left bg-gold/80"
+          aria-hidden="true"
+        />
+      </motion.header>
 
       {/* mobile overlay menu */}
       <AnimatePresence>

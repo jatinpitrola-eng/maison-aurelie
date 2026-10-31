@@ -170,3 +170,100 @@ html {
     radial-gradient(52% 38% at 50% 0%, rgba(198, 162, 92, 0.12) 0%, transparent 70%),
     radial-gradient(40% 30% at 88% 82%, rgba(198, 162, 92, 0.07) 0%, transparent 70%);
 }
+
+/* ——————————————————————————— motion upgrade ——————————————————————————— */
+
+/* slow ken-burns drift for the hero photograph */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1.14);
+  }
+}
+.animate-kenburns {
+  animation: ken-burns 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* slow rotation for circular gold seals */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 26s linear infinite;
+}
+
+/* twinkling gold sparkles */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.sparkle {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(251, 248, 240, 0.95) 0%,
+    rgba(198, 162, 92, 0.65) 45%,
+    transparent 72%
+  );
+  animation: twinkle 3.4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* reversed editorial marquee */
+@keyframes marquee-x-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-marquee-reverse {
+  animation: marquee-x-reverse 46s linear infinite;
+}
+
+/* outlined display text — footer watermark */
+.text-outline-gold {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(198, 162, 92, 0.28);
+}
+
+/* gentle float for badges */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+.animate-float {
+  animation: float-y 5.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-kenburns,
+  .animate-spin-slow,
+  .animate-marquee-reverse,
+  .animate-float {
+    animation: none;
+  }
+  .sparkle {
+    animation: none;
+    opacity: 0.5;
+  }
+}

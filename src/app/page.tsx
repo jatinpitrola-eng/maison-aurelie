@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react'
 import Lenis from 'lenis'
 import { lenisRef } from '@/lib/jewelry-store'
 import { Nav } from '@/components/site/nav'
+import { Preloader } from '@/components/site/preloader'
+import { ScrollTop } from '@/components/site/scroll-top'
 import { Hero } from '@/components/site/hero'
 import { Marquee } from '@/components/site/marquee'
 import { Collections } from '@/components/site/collections'
@@ -43,6 +45,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-noir font-sans text-ivory selection:bg-gold/30">
+      <Preloader />
       <Nav />
 
       <main ref={mainRef} className="relative flex flex-col">
@@ -59,6 +62,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <ScrollTop />
     </div>
   )
 }

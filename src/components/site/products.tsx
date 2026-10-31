@@ -62,14 +62,18 @@ export function Products() {
         {/* grid */}
         <motion.div layout className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
           <AnimatePresence mode="popLayout">
-            {shown.map((p) => (
+            {shown.map((p, i) => (
               <motion.article
                 layout
                 key={p.id}
                 initial={{ opacity: 0, y: 26 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.5,
+                  delay: i * 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
                 className="group relative overflow-hidden border border-gold/12 bg-onyx transition-colors duration-500 hover:border-gold/45"
               >
                 <div className="relative aspect-[4/5] w-full overflow-hidden">
@@ -82,6 +86,11 @@ export function Products() {
                   />
                   <div
                     className="absolute inset-0 bg-gradient-to-t from-onyx/85 via-transparent to-transparent"
+                    aria-hidden="true"
+                  />
+                  {/* gold shimmer sweep on hover */}
+                  <div
+                    className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-champagne/18 to-transparent transition-transform duration-[1400ms] ease-out group-hover:translate-x-full"
                     aria-hidden="true"
                   />
                   <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">

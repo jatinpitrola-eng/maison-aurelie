@@ -4,6 +4,9 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { scrollToId } from '@/lib/jewelry-store'
+import { LetterReveal, Sparkles } from './motion-primitives'
+
+const EASE_OUT = [0.22, 1, 0.36, 1] as const
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null)
@@ -11,9 +14,10 @@ export function Hero() {
     target: ref,
     offset: ['start start', 'end start'],
   })
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '16%'])
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.12])
-  const fade = useTransform(scrollYProgress, [0, 0.75], [1, 0])
+  /* three-layer parallax: photo drifts, copy lifts away, vignette deepens */
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '18%'])
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '-34%'])
+  const fade = useTransform(scrollYProgress, [0, 0.72], [1, 0])
 
   return (
     <section
@@ -22,15 +26,15 @@ export function Hero() {
       className="relative flex min-h-[100svh] items-center justify-center overflow-hidden"
       aria-label="AURÉLIE — fine jewellery maison"
     >
-      {/* parallax photograph */}
-      <motion.div style={{ y: bgY, scale: bgScale }} className="absolute inset-0">
+      {/* parallax photograph with continuous ken-burns drift */}
+      <motion.div style={{ y: bgY, scale: 1.06 }} className="absolute inset-0">
         <Image
           src="/images/bridal-2.jpg"
           alt="A bride wearing hand-crafted 22k gold polki jewellery by AURÉLIE"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[50%_22%]"
+          className="animate-kenburns object-cover object-[50%_22%]"
         />
       </motion.div>
 
@@ -44,39 +48,55 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      {/* copy */}
+      {/* drifting gold dust */}
+      <Sparkles className="z-[1]" />
+
+      {/* copy — lifts at a different rate than the photo */}
       <motion.div
-        style={{ opacity: fade }}
+        style={{ opacity: fade, y: contentY }}
         className="relative z-10 mx-auto max-w-4xl px-6 pt-24 pb-16 text-center"
       >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, delay: 2.05, ease: EASE_OUT }}
           className="flex items-center justify-center gap-4"
         >
-          <span className="h-px w-12 bg-gold/70 sm:w-16" aria-hidden="true" />
+          <motion.span
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.9, delay: 2, ease: EASE_OUT }}
+            className="h-px w-12 origin-right bg-gold/70 sm:w-16"
+            aria-hidden="true"
+          />
           <p className="text-[10px] font-light uppercase tracking-[0.24em] text-gold sm:text-[11px] sm:tracking-[0.44em]">
             Maison de Haute Joaillerie · Est. 1962
           </p>
-          <span className="h-px w-12 bg-gold/70 sm:w-16" aria-hidden="true" />
+          <motion.span
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.9, delay: 2, ease: EASE_OUT }}
+            className="h-px w-12 origin-left bg-gold/70 sm:w-16"
+            aria-hidden="true"
+          />
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 34 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-7 font-display text-[13.5vw] leading-[1.02] font-medium text-ivory sm:text-7xl lg:text-[104px]"
-        >
-          Where Gold
+        <h1 className="mt-7 font-display text-[13.5vw] leading-[1.02] font-medium text-ivory sm:text-7xl lg:text-[104px]">
+          <LetterReveal text="Where Gold" delay={2.25} stagger={0.032} />
           <br />
-          <em className="gold-text font-medium">Remembers Light</em>
-        </motion.h1>
+          <LetterReveal
+            text="Remembers Light"
+            delay={2.5}
+            stagger={0.032}
+            className="font-medium italic"
+            letterClassName="gold-text"
+          />
+        </h1>
 
         <motion.p
           initial={{ opacity: 0, y: 26 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.48, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, delay: 2.85, ease: EASE_OUT }}
           className="mx-auto mt-7 max-w-xl text-[15px] font-light leading-relaxed tracking-wide text-ivory/75 sm:text-base"
         >
           Rare diamonds, untamed emeralds and 22k gold — composed by hand in our
@@ -86,21 +106,27 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.64, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, delay: 3.02, ease: EASE_OUT }}
           className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          <button
+          <motion.button
+            whileHover={{ scale: 1.045 }}
+            whileTap={{ scale: 0.965 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
             onClick={() => scrollToId('collections')}
-            className="w-full border border-gold bg-gold px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-noir transition-all duration-300 hover:bg-champagne sm:w-auto"
+            className="w-full border border-gold bg-gold px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-noir transition-colors duration-300 hover:bg-champagne sm:w-auto"
           >
             Explore the Collection
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.045 }}
+            whileTap={{ scale: 0.965 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
             onClick={() => scrollToId('appointment')}
-            className="w-full border border-ivory/35 px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-ivory transition-all duration-300 hover:border-gold hover:text-gold sm:w-auto"
+            className="w-full border border-ivory/35 px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-ivory transition-colors duration-300 hover:border-gold hover:text-gold sm:w-auto"
           >
             Book a Private Viewing
-          </button>
+          </motion.button>
         </motion.div>
       </motion.div>
 
@@ -108,7 +134,7 @@ export function Hero() {
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, delay: 1.1 }}
+        transition={{ duration: 1.2, delay: 3.4 }}
         onClick={() => scrollToId('collections')}
         className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2"
         aria-label="Scroll to collections"

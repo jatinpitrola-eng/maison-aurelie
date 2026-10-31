@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { scrollToId } from '@/lib/jewelry-store'
 import { Reveal } from './reveal'
+import { WordsReveal } from './motion-primitives'
 
 export function BridalBanner() {
   const ref = useRef<HTMLElement>(null)
@@ -13,6 +14,7 @@ export function BridalBanner() {
     offset: ['start end', 'end start'],
   })
   const y = useTransform(scrollYProgress, [0, 1], ['-14%', '14%'])
+  const scale = useTransform(scrollYProgress, [0, 1], [1.04, 1.12])
 
   return (
     <section
@@ -21,7 +23,7 @@ export function BridalBanner() {
       className="relative flex min-h-[80vh] items-center justify-center overflow-hidden"
       aria-label="Bridal atelier"
     >
-      <motion.div style={{ y }} className="absolute inset-0 -top-[14%] -bottom-[14%]">
+      <motion.div style={{ y, scale }} className="absolute inset-0 -top-[14%] -bottom-[14%]">
         <Image
           src="/images/bridal-1.jpg"
           alt="A bride in a veil wearing a layered 22k gold bridal set"
@@ -45,13 +47,17 @@ export function BridalBanner() {
               </p>
             </div>
           </Reveal>
-          <Reveal delay={0.1}>
-            <h2 className="mt-5 font-display text-5xl leading-[1.06] font-medium text-ivory sm:text-6xl lg:text-7xl">
-              For the day
-              <br />
-              <em className="gold-text">everything begins</em>
-            </h2>
-          </Reveal>
+
+          <h2 className="mt-5 font-display text-5xl leading-[1.06] font-medium text-ivory sm:text-6xl lg:text-7xl">
+            <WordsReveal
+              lines={[
+                { words: 'For the day' },
+                { words: 'everything begins', accent: true },
+              ]}
+              stagger={0.07}
+            />
+          </h2>
+
           <Reveal delay={0.18}>
             <p className="mt-6 max-w-md font-sans text-[15px] font-light leading-relaxed tracking-wide text-ivory/70">
               Sixteen weeks, one master jeweller and a trousseau told in gold. Our
@@ -59,13 +65,17 @@ export function BridalBanner() {
               sources and fits — from the first mehndi to the phera.
             </p>
           </Reveal>
+
           <Reveal delay={0.26}>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.045 }}
+              whileTap={{ scale: 0.965 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 22 }}
               onClick={() => scrollToId('appointment')}
-              className="mt-9 border border-gold bg-gold px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-noir transition-all duration-300 hover:bg-champagne"
+              className="mt-9 border border-gold bg-gold px-9 py-4 text-[11px] font-normal uppercase tracking-[0.3em] text-noir transition-colors duration-300 hover:bg-champagne"
             >
               Begin your bridal journey
-            </button>
+            </motion.button>
           </Reveal>
         </div>
       </div>

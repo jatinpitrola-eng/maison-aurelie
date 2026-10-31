@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { scrollToId } from '@/lib/jewelry-store'
 
 const HOUSE_LINKS = [
@@ -105,6 +106,30 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* monumental watermark rising from the gold leaf edge */}
+      <motion.div
+        initial="closed"
+        whileInView="open"
+        viewport={{ once: true, margin: '-40px' }}
+        variants={{ closed: {}, open: {} }}
+        className="pointer-events-none overflow-hidden"
+        aria-hidden="true"
+      >
+        <motion.p
+          variants={{
+            closed: { y: '46%', opacity: 0 },
+            open: {
+              y: '14%',
+              opacity: 1,
+              transition: { duration: 1.4, ease: [0.22, 1, 0.36, 1] },
+            },
+          }}
+          className="text-outline-gold -mb-[0.16em] text-center font-display text-[21vw] leading-[0.9] font-semibold tracking-[0.06em] select-none"
+        >
+          AURÉLIE
+        </motion.p>
+      </motion.div>
 
       <div className="border-t border-gold/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 sm:flex-row sm:px-8">

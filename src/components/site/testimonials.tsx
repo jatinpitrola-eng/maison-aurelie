@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { Reveal, SectionHeader } from './reveal'
 
@@ -41,10 +42,23 @@ export function Testimonials() {
         <div className="mt-14 grid gap-5 md:grid-cols-3">
           {QUOTES.map((q, i) => (
             <Reveal key={q.name} delay={0.1 * i}>
-              <figure className="flex h-full flex-col border border-espresso/10 bg-ivory/70 p-7 transition-shadow duration-500 hover:shadow-[0_18px_50px_-24px_rgba(25,21,18,0.35)] sm:p-8">
+              <figure className="flex h-full flex-col border border-espresso/10 bg-ivory/70 p-7 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_18px_50px_-24px_rgba(25,21,18,0.35)] sm:p-8">
                 <div className="flex gap-1 text-golddeep" aria-label="Five star review">
                   {Array.from({ length: 5 }).map((_, s) => (
-                    <Star key={s} className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                    <motion.span
+                      key={s}
+                      initial={{ opacity: 0, scale: 0, rotate: -30 }}
+                      whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                      viewport={{ once: true, margin: '-60px' }}
+                      transition={{
+                        duration: 0.45,
+                        delay: 0.15 + s * 0.07,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="inline-flex"
+                    >
+                      <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                    </motion.span>
                   ))}
                 </div>
                 <blockquote className="mt-5 flex-1 font-display text-[21px] leading-relaxed font-medium text-espresso/85 italic">

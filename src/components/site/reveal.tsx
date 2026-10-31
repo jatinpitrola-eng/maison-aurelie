@@ -48,7 +48,14 @@ export function SectionHeader({
         <div
           className={`flex items-center gap-4 ${centered ? 'justify-center' : 'justify-start'}`}
         >
-          <span className="h-px w-10 bg-gold/60" aria-hidden="true" />
+          <motion.span
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            className="h-px w-10 origin-right bg-gold/60"
+            aria-hidden="true"
+          />
           <p
             className={`text-[11px] font-light uppercase tracking-[0.42em] ${
               tone === 'dark' ? 'text-gold' : 'text-golddeep'
@@ -56,7 +63,14 @@ export function SectionHeader({
           >
             {kicker}
           </p>
-          <span className="h-px w-10 bg-gold/60" aria-hidden="true" />
+          <motion.span
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            className="h-px w-10 origin-left bg-gold/60"
+            aria-hidden="true"
+          />
         </div>
       </Reveal>
       <Reveal delay={0.08}>
