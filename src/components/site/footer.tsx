@@ -1,63 +1,119 @@
 'use client'
 
-import { Gem } from 'lucide-react'
 import { scrollToId } from '@/lib/jewelry-store'
 
-const MAISON: Array<[string, string]> = [
-  ['Collection', 'piece-ring'],
-  ['Atelier', 'piece-bangle'],
-  ['Vault', 'vault'],
-  ['Private Salon', 'appointment'],
+const HOUSE_LINKS = [
+  { label: 'Collections', id: 'collections' },
+  { label: 'Signature — Rivière Émeraude', id: 'signature' },
+  { label: 'The Atelier', id: 'atelier' },
+  { label: 'The Vault', id: 'collection' },
+  { label: 'Bridal Atelier', id: 'bridal' },
+]
+
+const SALONS = [
+  ['Ahmedabad', 'One Sanskriti, CG Road'],
+  ['Mumbai', 'Kala Ghoda, Fort'],
+  ['Paris', '12 Place Vendôme'],
 ]
 
 export function Footer() {
   return (
-    <footer className="relative z-10 mt-auto bg-coffee text-champagne/70">
-      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
-        <div className="grid gap-12 md:grid-cols-3">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <Gem className="h-4 w-4 text-gold" strokeWidth={1.5} />
-              <span className="font-display text-lg tracking-[0.42em] text-champagne">
-                AURÉLIE
-              </span>
-            </div>
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-champagne/50">
-              Haute joaillerie, hand-finished in Paris since 1924. One piece at a
-              time — never twice.
+    <footer className="mt-auto border-t border-gold/15 bg-noir" aria-label="Footer">
+      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
+        <div className="grid gap-10 md:grid-cols-12">
+          {/* brand */}
+          <div className="md:col-span-5">
+            <p className="font-display text-3xl font-semibold tracking-[0.18em] text-ivory">
+              AURÉLIE
+            </p>
+            <p className="mt-1 text-[10px] font-light uppercase tracking-[0.34em] text-gold">
+              Maison de Joaillerie · Est. 1962
+            </p>
+            <p className="mt-5 max-w-sm text-[13px] font-light leading-relaxed tracking-wide text-ivory/50">
+              Rare stones, hand-forged gold and sixty years of one craft. Every
+              piece is signed by the jeweller who made it — and cared for by the
+              maison, for life.
             </p>
           </div>
 
-          <nav aria-label="Footer">
-            <p className="mb-5 text-[10px] uppercase tracking-[0.3em] text-gold">Maison</p>
-            <ul className="space-y-3">
-              {MAISON.map(([label, id]) => (
-                <li key={id}>
+          {/* house links */}
+          <nav className="md:col-span-3" aria-label="Footer navigation">
+            <p className="text-[10px] font-light uppercase tracking-[0.34em] text-gold">
+              The House
+            </p>
+            <ul className="mt-5 space-y-3">
+              {HOUSE_LINKS.map((l) => (
+                <li key={l.id}>
                   <button
-                    onClick={() => scrollToId(id)}
-                    className="text-sm text-champagne/60 transition-colors hover:text-gold"
+                    onClick={() => scrollToId(l.id)}
+                    className="text-[13px] font-light tracking-wide text-ivory/60 transition-colors hover:text-gold"
                   >
-                    {label}
+                    {l.label}
                   </button>
                 </li>
               ))}
             </ul>
           </nav>
 
-          <div>
-            <p className="mb-5 text-[10px] uppercase tracking-[0.3em] text-gold">Salon</p>
-            <address className="space-y-3 text-sm not-italic text-champagne/60">
-              <p>21 Rue de la Paix, 75002 Paris</p>
-              <p>salon@aurelie.paris</p>
-              <p>+33 1 42 60 00 00</p>
-              <p className="text-champagne/40">Tue – Sat, 10h – 19h · By appointment</p>
-            </address>
+          {/* salons */}
+          <div className="md:col-span-2">
+            <p className="text-[10px] font-light uppercase tracking-[0.34em] text-gold">
+              Salons
+            </p>
+            <ul className="mt-5 space-y-4">
+              {SALONS.map(([city, addr]) => (
+                <li key={city}>
+                  <p className="text-[13px] tracking-[0.12em] text-ivory/75 uppercase">
+                    {city}
+                  </p>
+                  <p className="mt-0.5 text-[12px] font-light text-ivory/45">{addr}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* contact */}
+          <div className="md:col-span-2">
+            <p className="text-[10px] font-light uppercase tracking-[0.34em] text-gold">
+              Concierge
+            </p>
+            <ul className="mt-5 space-y-3 text-[13px] font-light text-ivory/60">
+              <li>
+                <a
+                  href="tel:+919876543210"
+                  className="transition-colors hover:text-gold"
+                >
+                  +91 98765 43210
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:care@aureliejewels.com"
+                  className="transition-colors hover:text-gold"
+                >
+                  care@aureliejewels.com
+                </a>
+              </li>
+              <li className="text-ivory/40">Mon–Sat · 10:30–20:00</li>
+            </ul>
+            <button
+              onClick={() => scrollToId('appointment')}
+              className="mt-6 border border-gold/60 px-5 py-2.5 text-[10px] font-light uppercase tracking-[0.28em] text-gold transition-all duration-300 hover:bg-gold hover:text-noir"
+            >
+              Book a Viewing
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-champagne/10 pt-6 text-[10px] uppercase tracking-[0.22em] text-champagne/35 md:flex-row md:items-center md:justify-between">
-          <span>© 2025 Maison Aurélie — Paris</span>
-          <span>Crafted in 18k gold & platinum 950</span>
+      <div className="border-t border-gold/10">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 sm:flex-row sm:px-8">
+          <p className="text-[11px] font-light tracking-[0.18em] text-ivory/40">
+            © {new Date().getFullYear()} Maison Aurélie. All rights reserved.
+          </p>
+          <p className="text-[11px] font-light tracking-[0.18em] text-ivory/40">
+            GIA Certified · BIS Hallmarked · Lifetime Care
+          </p>
         </div>
       </div>
     </footer>

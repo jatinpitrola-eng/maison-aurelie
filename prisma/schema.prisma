@@ -31,5 +31,7 @@ model Reservation {
   email     String
   phone     String?
   piece     String
+  date      String?
+  note      String?
   createdAt DateTime @default(now())
 }

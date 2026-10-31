@@ -10,17 +10,17 @@ import '@fontsource/jost/500.css'
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AURÉLIE — Haute Joaillerie · Paris",
+  title: "AURÉLIE — Fine Jewellery · Est. 1962",
   description:
-    "Rare diamonds and untamed coloured gems, composed by hand in our Paris atelier. An interactive 3D journey through five one-of-a-kind pieces — ring, necklace, earrings, bangle and tiara.",
-  keywords: ["AURÉLIE", "haute joaillerie", "high jewelry", "diamonds", "3D website", "WebGL", "Paris"],
+    "A luxury jewellery maison — rare diamonds, Colombian emeralds and hand-crafted 22k gold. Explore our collections of rings, necklaces, earrings and bangles, and book a private viewing.",
+  keywords: ["AURÉLIE", "jewellery", "fine jewelry", "diamonds", "emerald", "gold", "bridal jewellery", "luxury"],
   authors: [{ name: "Maison Aurélie" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "AURÉLIE — Haute Joaillerie · Paris",
-    description: "Light, set in stone. A 3D scroll journey through the maison's five masterpieces.",
+    title: "AURÉLIE — Fine Jewellery · Est. 1962",
+    description: "Rare stones, hand-forged gold. Jewels that outlive time.",
     siteName: "Maison Aurélie",
     type: "website",
   },
@@ -33,10 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className="antialiased bg-background text-foreground"
-        style={{ background: "transparent" }}
-      >{children}</body>
+      <body className="antialiased bg-noir text-ivory">{children}</body>
     </html>
   );
 }

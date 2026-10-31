@@ -7,6 +7,8 @@ const reservationSchema = z.object({
   email: z.email('Please provide a valid email').max(120),
   phone: z.string().trim().max(40).optional().or(z.literal('')),
   piece: z.string().trim().min(2).max(80),
+  date: z.string().trim().max(40).optional().or(z.literal('')),
+  note: z.string().trim().max(500).optional().or(z.literal('')),
 })
 
 export async function POST(req: Request) {
@@ -21,7 +23,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { name, email, phone, piece } = parsed.data
+    const { name, email, phone, piece, date, note } = parsed.data
 
     const reservation = await db.reservation.create({
       data: {
@@ -29,6 +31,8 @@ export async function POST(req: Request) {
         email,
         phone: phone || null,
         piece,
+        date: date || null,
+        note: note || null,
       },
     })
 

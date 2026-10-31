@@ -43,50 +43,52 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ——— Maison Aurélie palette · Porcelain & Émeraude ——— */
-  --color-ivory: #F6F4EC;
-  --color-parchment: #FCFAF4;
-  --color-espresso: #1A2C22;
-  --color-coffee: #0F3125;
-  --color-sand: #6B7A6E;
-  --color-gold: #AE8A4C;
-  --color-golddeep: #8C6C33;
-  --color-champagne: #F2EAD8;
+  /* ——— Maison Aurélie · Noir & Or ——— */
+  --color-noir: #0B0907;
+  --color-onyx: #171310;
+  --color-coal: #221C15;
+  --color-ivory: #F6F1E6;
+  --color-parchment: #FBF8F0;
+  --color-espresso: #191512;
+  --color-sand: #8A7E6A;
+  --color-gold: #C6A25C;
+  --color-golddeep: #96742F;
+  --color-champagne: #EBDDBE;
 }
 
 :root {
   --radius: 0.25rem;
-  --background: #F6F4EC;
-  --foreground: #1A2C22;
-  --card: #FCFAF4;
-  --card-foreground: #1A2C22;
-  --popover: #FCFAF4;
-  --popover-foreground: #1A2C22;
-  --primary: #1A2C22;
-  --primary-foreground: #F6F4EC;
-  --secondary: #E9EBDD;
-  --secondary-foreground: #1A2C22;
-  --muted: #EBEDE1;
-  --muted-foreground: #68766B;
-  --accent: #E6E9D8;
-  --accent-foreground: #1A2C22;
-  --destructive: #A0322D;
-  --border: #DCE0CE;
-  --input: #DCE0CE;
-  --ring: #AE8A4C;
-  --chart-1: #AE8A4C;
-  --chart-2: #0F3125;
-  --chart-3: #8C6C33;
-  --chart-4: #C9A85E;
-  --chart-5: #1A2C22;
-  --sidebar: #FCFAF4;
-  --sidebar-foreground: #1A2C22;
-  --sidebar-primary: #1A2C22;
-  --sidebar-primary-foreground: #F6F4EC;
-  --sidebar-accent: #E9EBDD;
-  --sidebar-accent-foreground: #1A2C22;
-  --sidebar-border: #DCE0CE;
-  --sidebar-ring: #AE8A4C;
+  --background: #0B0907;
+  --foreground: #F6F1E6;
+  --card: #171310;
+  --card-foreground: #F6F1E6;
+  --popover: #171310;
+  --popover-foreground: #F6F1E6;
+  --primary: #C6A25C;
+  --primary-foreground: #0B0907;
+  --secondary: #221C15;
+  --secondary-foreground: #F6F1E6;
+  --muted: #221C15;
+  --muted-foreground: #8A7E6A;
+  --accent: #C6A25C;
+  --accent-foreground: #0B0907;
+  --destructive: #B0483C;
+  --border: rgba(198, 162, 92, 0.22);
+  --input: rgba(198, 162, 92, 0.32);
+  --ring: #C6A25C;
+  --chart-1: #C6A25C;
+  --chart-2: #96742F;
+  --chart-3: #EBDDBE;
+  --chart-4: #8A7E6A;
+  --chart-5: #191512;
+  --sidebar: #171310;
+  --sidebar-foreground: #F6F1E6;
+  --sidebar-primary: #C6A25C;
+  --sidebar-primary-foreground: #0B0907;
+  --sidebar-accent: #221C15;
+  --sidebar-accent-foreground: #F6F1E6;
+  --sidebar-border: rgba(198, 162, 92, 0.22);
+  --sidebar-ring: #C6A25C;
 }
 
 @layer base {
@@ -99,14 +101,14 @@
   }
   body {
     @apply text-foreground font-sans;
-    background: transparent;
+    background: #0B0907;
   }
 }
 
-/* --------------------------- Maison Aurélie site --------------------------- */
+/* ——————————————————————————— Maison Aurélie site ——————————————————————————— */
 
 html {
-  background: #F6F4EC;
+  background: #0B0907;
 }
 
 body {
@@ -114,31 +116,57 @@ body {
 }
 
 ::selection {
-  background: rgba(174, 138, 76, 0.26);
-  color: #1A2C22;
+  background: rgba(198, 162, 92, 0.35);
+  color: #FBF8F0;
 }
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: #B4C4B4 transparent;
+  scrollbar-color: rgba(198, 162, 92, 0.45) transparent;
 }
 ::-webkit-scrollbar {
   width: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0B0907;
 }
 ::-webkit-scrollbar-thumb {
-  background: #B4C4B4;
+  background: rgba(198, 162, 92, 0.4);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #AE8A4C;
+  background: #C6A25C;
 }
 
-/* light-only photographic bloom — never dark edges */
-.vignette {
+/* gold gradient display text */
+.gold-text {
+  background: linear-gradient(100deg, #96742f 0%, #d9bc7d 38%, #c6a25c 62%, #8a6a2c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* infinite marquee */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee-x 36s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* soft candlelight glow used behind dark sections */
+.glow-gold {
   background:
-    radial-gradient(90% 55% at 72% 10%, rgba(174, 138, 76, 0.09) 0%, transparent 62%),
-    radial-gradient(70% 50% at 10% 88%, rgba(15, 49, 37, 0.05) 0%, transparent 60%);
+    radial-gradient(52% 38% at 50% 0%, rgba(198, 162, 92, 0.12) 0%, transparent 70%),
+    radial-gradient(40% 30% at 88% 82%, rgba(198, 162, 92, 0.07) 0%, transparent 70%);
 }
